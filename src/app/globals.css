@@ -1,0 +1,84 @@
+/* src/app/globals.css */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+@import "tailwindcss";
+
+
+
+@theme {
+  /* ── Core neutrals ── */
+  --color-background:        #0a0a0a;
+  --color-surface:           #111111;
+  --color-surface-2:         #1a1a1a;
+  --color-surface-3:         #222222;
+  --color-border:            #2a2a2a;
+  --color-border-subtle:     #1f1f1f;
+
+  /* ── Text ── */
+  --color-text-primary:      #f0f0f0;
+  --color-text-secondary:    #888888;
+  --color-text-muted:        #555555;
+
+  /* ── Accent — single violet ── */
+  --color-accent:            #7c6ef7;
+  --color-accent-hover:      #8f84f9;
+  --color-accent-muted:      #7c6ef720;
+  --color-accent-border:     #7c6ef740;
+
+  /* ── Semantic ── */
+  --color-success:           #22c55e;
+  --color-success-muted:     #22c55e15;
+  --color-warning:           #f59e0b;
+  --color-warning-muted:     #f59e0b15;
+  --color-danger:            #ef4444;
+  --color-danger-muted:      #ef444415;
+
+  /* ── Priority colors ── */
+  --color-low:               #3b82f6;
+  --color-medium:            #7c6ef7;
+  --color-high:              #f59e0b;
+  --color-urgent:            #ef4444;
+
+  /* ── Font ── */
+  --font-sans:               'Inter', system-ui, sans-serif;
+  --font-mono:               'JetBrains Mono', monospace;
+
+  /* ── Radius ── */
+  --radius-sm:  4px;
+  --radius-md:  8px;
+  --radius-lg:  12px;
+  --radius-xl:  16px;
+  --radius-2xl: 20px;
+}
+
+/* ── Base reset ── */
+*, *::before, *::after { box-sizing: border-box; }
+
+html { color-scheme: dark; }
+
+body {
+  font-family:      var(--font-sans);
+  background-color: var(--color-background);
+  color:            var(--color-text-primary);
+  font-size:        14px;
+  line-height:      1.6;
+  -webkit-font-smoothing:  antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar       { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-text-muted); }
+
+/* ── Selection ── */
+::selection {
+  background: var(--color-accent-muted);
+  color: var(--color-text-primary);
+}
+
+/* ── Focus ── */
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
