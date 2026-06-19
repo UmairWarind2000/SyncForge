@@ -17,15 +17,15 @@ interface ChatPanelProps {
 export function ChatPanel({ workspaceId }: ChatPanelProps) {
   const { data: session } = useSession();
   const dispatch = useAppDispatch();
-  const { emit }  = useSocket(workspaceId);
+  const { emit } = useSocket(workspaceId);
 
-  const messages     = useAppSelector((s) => s.chat.messages[workspaceId] ?? []);
-  const typingUsers  = useAppSelector((s) => s.chat.typingUsers);
+  const messages = useAppSelector((s) => s.chat.messages[workspaceId] ?? []);
+  const typingUsers = useAppSelector((s) => s.chat.typingUsers);
 
-  const [input, setInput]             = useState("");
-  const [isTyping, setIsTyping]       = useState(false);
-  const bottomRef                     = useRef<HTMLDivElement>(null);
-  const typingTimerRef                = useRef<ReturnType<typeof setTimeout>>();
+  const [input, setInput] = useState("");
+  const [isTyping, setIsTyping] = useState(false);
+  const bottomRef = useRef<HTMLDivElement>(null);
+  const typingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Load message history from API
   const { data: serverMessages } = useGetMessagesQuery(workspaceId);
@@ -37,7 +37,7 @@ export function ChatPanel({ workspaceId }: ChatPanelProps) {
           workspaceId,
           messages: serverMessages.map((m) => ({
             ...m,
-            authorName:  m.authorName ?? "Unknown",
+            authorName: m.authorName ?? "Unknown",
             authorImage: m.authorImage ?? null,
           })),
         })
@@ -59,13 +59,15 @@ export function ChatPanel({ workspaceId }: ChatPanelProps) {
         setIsTyping(true);
         emit("chat:typing", {
           workspaceId,
-          userId:   session?.user?.id,
+          userId: session?.user?.id,
           userName: session?.user?.name,
         });
       }
 
       // Stop typing after 2s of no input
-      clearTimeout(typingTimerRef.current);
+      if (typingTimerRef.current) {
+        clearTimeout(typingTimerRef.current);
+      }
       typingTimerRef.current = setTimeout(() => {
         setIsTyping(false);
         emit("chat:stop-typing", {
@@ -88,14 +90,14 @@ export function ChatPanel({ workspaceId }: ChatPanelProps) {
       addOptimisticMessage({
         workspaceId,
         message: {
-          id:          tempId,
-          content:     input.trim(),
-          createdAt:   new Date().toISOString(),
-          authorId:    session.user.id,
-          authorName:  session.user.name ?? "You",
+          id: tempId,
+          content: input.trim(),
+          createdAt: new Date().toISOString(),
+          authorId: session.user.id,
+          authorName: session.user.name ?? "You",
           authorImage: session.user.image ?? null,
           tempId,
-          isPending:   true,
+          isPending: true,
         },
       })
     );
@@ -103,16 +105,18 @@ export function ChatPanel({ workspaceId }: ChatPanelProps) {
     // Send via Socket.io
     emit("chat:message", {
       workspaceId,
-      content:     input.trim(),
-      authorId:    session.user.id,
-      authorName:  session.user.name,
+      content: input.trim(),
+      authorId: session.user.id,
+      authorName: session.user.name,
       authorImage: session.user.image,
       tempId,
     });
 
     setInput("");
     setIsTyping(false);
-    clearTimeout(typingTimerRef.current);
+    if (typingTimerRef.current) {
+      clearTimeout(typingTimerRef.current);
+    }
   }
 
   const typingNames = Object.values(typingUsers).filter(Boolean);
@@ -151,19 +155,17 @@ export function ChatPanel({ workspaceId }: ChatPanelProps) {
                   </span>
                 )}
                 <div
-                  className={`px-3 py-2 rounded-2xl text-sm leading-relaxed ${
-                    isOwn
-                      ? `bg-primary text-primary-foreground rounded-tr-sm ${
-                          msg.isPending ? "opacity-70" : ""
-                        }`
-                      : "bg-muted rounded-tl-sm"
-                  }`}
+                  className={`px-3 py-2 rounded-2xl text-sm leading-relaxed ${isOwn
+                    ? `bg-primary text-primary-foreground rounded-tr-sm ${msg.isPending ? "opacity-70" : ""
+                    }`
+                    : "bg-muted rounded-tl-sm"
+                    }`}
                 >
                   {msg.content}
                 </div>
                 <span className="text-xs text-muted-foreground mt-1">
                   {new Date(msg.createdAt).toLocaleTimeString([], {
-                    hour:   "2-digit",
+                    hour: "2-digit",
                     minute: "2-digit",
                   })}
                 </span>
