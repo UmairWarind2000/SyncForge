@@ -10,12 +10,12 @@ import { updateLocalContent, getUserColor } from "@/store/slices/editorSlice";
 import { useSocket } from "@/hooks/useSocket";
 
 interface MonacoEditorProps {
-  fileId:            string;
-  content:           string;
-  language:          string;
-  workspaceId:       string;
-  onSelectionChange?: (code: string) => void; 
-  onInsertRef?:       React.MutableRefObject<((code: string) => void) | null>;
+  fileId: string;
+  content: string;
+  language: string;
+  workspaceId: string;
+  onSelectionChange?: (code: string) => void;
+  onInsertRef?: React.MutableRefObject<((code: string) => void) | null>;
 }
 
 export function MonacoEditorComponent({
@@ -23,17 +23,19 @@ export function MonacoEditorComponent({
   content,
   language,
   workspaceId,
+  onSelectionChange,
+  onInsertRef,
 }: MonacoEditorProps) {
   const { data: session } = useSession();
-  const dispatch          = useAppDispatch();
-  const { emit }          = useSocket(workspaceId);
+  const dispatch = useAppDispatch();
+  const { emit } = useSocket(workspaceId);
 
-  const editorRef    = useRef<Monaco.editor.IStandaloneCodeEditor | null>(null);
-  const monacoRef    = useRef<typeof Monaco | null>(null);
+  const editorRef = useRef<Monaco.editor.IStandaloneCodeEditor | null>(null);
+  const monacoRef = useRef<typeof Monaco | null>(null);
   // Track decorations for remote cursors
   const decorationsRef = useRef<string[]>([]);
   // Debounce ref for emitting changes
-  const emitTimerRef = useRef<ReturnType<typeof setTimeout>>();
+  const emitTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const remoteCursors = useAppSelector(
     (s) => s.editor.remoteCursors[fileId] ?? []
@@ -41,18 +43,18 @@ export function MonacoEditorComponent({
 
   // Called when editor mounts
   const handleMount: OnMount = useCallback((editor, monaco) => {
-    editorRef.current  = editor;
-    monacoRef.current  = monaco;
+    editorRef.current = editor;
+    monacoRef.current = monaco;
 
     // Configure Monaco theme to match our UI
     monaco.editor.defineTheme("syncforge-light", {
-      base:    "vs",
+      base: "vs",
       inherit: true,
-      rules:   [],
+      rules: [],
       colors: {
-        "editor.background":          "#ffffff",
+        "editor.background": "#ffffff",
         "editor.lineHighlightBackground": "#f8fafc",
-        "editorLineNumber.foreground":    "#94a3b8",
+        "editorLineNumber.foreground": "#94a3b8",
       },
     });
 
@@ -62,7 +64,7 @@ export function MonacoEditorComponent({
     emit("editor:file-opened", {
       workspaceId,
       fileId,
-      userId:   session?.user?.id ?? "",
+      userId: session?.user?.id ?? "",
       userName: session?.user?.name ?? "Unknown",
     });
 
@@ -73,38 +75,38 @@ export function MonacoEditorComponent({
       emit("editor:cursor", {
         workspaceId,
         fileId,
-        userId:     session.user.id,
-        userName:   session.user.name ?? "Unknown",
+        userId: session.user.id,
+        userName: session.user.name ?? "Unknown",
         lineNumber: e.position.lineNumber,
-        column:     e.position.column,
-        color:      getUserColor(session.user.id),
+        column: e.position.column,
+        color: getUserColor(session.user.id),
       });
     });
 
     // Track selected text and pass to AI panel
-editor.onDidChangeCursorSelection((e) => {
-  const model = editor.getModel();
-  if (!model) return;
-  const selected = model.getValueInRange(e.selection);
-  onSelectionChange?.(selected);
-});
+    editor.onDidChangeCursorSelection((e) => {
+      const model = editor.getModel();
+      if (!model) return;
+      const selected = model.getValueInRange(e.selection);
+      onSelectionChange?.(selected);
+    });
 
-// Expose insert function so AI panel can insert refactored code
-if (onInsertRef) {
-  onInsertRef.current = (code: string) => {
-    const selection = editor.getSelection();
-    if (!selection) return;
-    editor.executeEdits("ai-refactor", [
-      {
-        range:     selection,
-        text:      code,
-        forceMoveMarkers: true,
-      },
-    ]);
-    editor.focus();
-  };
-}
-  }, [fileId, workspaceId, session, emit]);
+    // Expose insert function so AI panel can insert refactored code
+    if (onInsertRef) {
+      onInsertRef.current = (code: string) => {
+        const selection = editor.getSelection();
+        if (!selection) return;
+        editor.executeEdits("ai-refactor", [
+          {
+            range: selection,
+            text: code,
+            forceMoveMarkers: true,
+          },
+        ]);
+        editor.focus();
+      };
+    }
+  }, [fileId, workspaceId, session, emit, onSelectionChange, onInsertRef]);
 
   // Called when content changes
   const handleChange: OnChange = useCallback(
@@ -115,7 +117,9 @@ if (onInsertRef) {
       dispatch(updateLocalContent({ fileId, content: value }));
 
       // Debounce socket emit — don't send on every single keystroke
-      clearTimeout(emitTimerRef.current);
+      if (emitTimerRef.current) {
+        clearTimeout(emitTimerRef.current);
+      }
       emitTimerRef.current = setTimeout(() => {
         emit("editor:change", {
           workspaceId,
@@ -145,7 +149,7 @@ if (onInsertRef) {
           cursor.column
         ),
         options: {
-          className:            `remote-cursor-${cursor.userId.slice(-6)}`,
+          className: `remote-cursor-${cursor.userId.slice(-6)}`,
           afterContentClassName: `remote-cursor-label`,
           // Inject CSS for this cursor color dynamically
           stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
@@ -226,20 +230,20 @@ if (onInsertRef) {
         onMount={handleMount}
         onChange={handleChange}
         options={{
-          fontSize:           14,
-          fontFamily:         "'Fira Code', 'Cascadia Code', 'Consolas', monospace",
-          fontLigatures:      true,
-          lineNumbers:        "on",
-          minimap:            { enabled: false },
+          fontSize: 14,
+          fontFamily: "'Fira Code', 'Cascadia Code', 'Consolas', monospace",
+          fontLigatures: true,
+          lineNumbers: "on",
+          minimap: { enabled: false },
           scrollBeyondLastLine: false,
-          wordWrap:           "on",
-          tabSize:            2,
-          renderLineHighlight:"line",
-          cursorBlinking:     "smooth",
-          smoothScrolling:    true,
-          contextmenu:        true,
-          automaticLayout:    true, // resize with container
-          padding:            { top: 12, bottom: 12 },
+          wordWrap: "on",
+          tabSize: 2,
+          renderLineHighlight: "line",
+          cursorBlinking: "smooth",
+          smoothScrolling: true,
+          contextmenu: true,
+          automaticLayout: true, // resize with container
+          padding: { top: 12, bottom: 12 },
         }}
         loading={
           <div className="flex items-center justify-center h-full">
