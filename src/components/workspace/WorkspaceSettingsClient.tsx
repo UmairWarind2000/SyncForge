@@ -8,51 +8,51 @@ import {
   Loader2, Save, UserPlus, Crown, Shield, Eye,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input }  from "@/components/ui/input";
-import { Label }  from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { UserAvatar } from "@/components/layout/UserAvatar";
 import { formatDate } from "@/lib/utils";
 import { WORKSPACE_COLORS } from "@/lib/design";
 
 interface Member {
-  userId:   string;
-  role:     string;
+  userId: string;
+  role: string;
   joinedAt: Date;
   user: {
-    id:    string;
-    name:  string | null;
+    id: string;
+    name: string | null;
     email: string | null;
     image: string | null;
   };
 }
 
 interface Workspace {
-  id:          string;
-  name:        string;
+  id: string;
+  name: string;
   description: string | null;
-  color:       string;
-  createdAt:   Date;
-  ownerId:     string;
-  members:     Member[];
+  color: string;
+  createdAt: Date;
+  ownerId: string;
+  members: Member[];
 }
 
 interface Props {
-  workspace:     Workspace;
+  workspace: Workspace;
   currentUserId: string;
-  isOwner:       boolean;
-  userRole:      string;
+  isOwner: boolean;
+  userRole: string;
 }
 
 const ROLE_ICONS: Record<string, React.ReactNode> = {
-  OWNER:  <Crown  className="h-3 w-3" />,
-  ADMIN:  <Shield className="h-3 w-3" />,
-  MEMBER: <Users  className="h-3 w-3" />,
-  VIEWER: <Eye    className="h-3 w-3" />,
+  OWNER: <Crown className="h-3 w-3" />,
+  ADMIN: <Shield className="h-3 w-3" />,
+  MEMBER: <Users className="h-3 w-3" />,
+  VIEWER: <Eye className="h-3 w-3" />,
 };
 
 const ROLE_COLORS: Record<string, { bg: string; color: string }> = {
-  OWNER:  { bg: "#7c6ef720", color: "#7c6ef7" },
-  ADMIN:  { bg: "#06b6d420", color: "#06b6d4" },
+  OWNER: { bg: "#7c6ef720", color: "#7c6ef7" },
+  ADMIN: { bg: "#06b6d420", color: "#06b6d4" },
   MEMBER: { bg: "#22222280", color: "#888888" },
   VIEWER: { bg: "#22222280", color: "#555555" },
 };
@@ -66,22 +66,22 @@ export function WorkspaceSettingsClient({
   const router = useRouter();
 
   // General settings state
-  const [name, setName]         = useState(workspace.name);
-  const [description, setDesc]  = useState(workspace.description ?? "");
-  const [color, setColor]       = useState(workspace.color);
+  const [name, setName] = useState(workspace.name);
+  const [description, setDesc] = useState(workspace.description ?? "");
+  const [color, setColor] = useState(workspace.color);
   const [isSaving, setIsSaving] = useState(false);
-  const [saveMsg, setSaveMsg]   = useState("");
+  const [saveMsg, setSaveMsg] = useState("");
 
   // Invite state
-  const [inviteEmail, setInviteEmail]     = useState("");
-  const [isInviting, setIsInviting]       = useState(false);
-  const [inviteError, setInviteError]     = useState("");
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [isInviting, setIsInviting] = useState(false);
+  const [inviteError, setInviteError] = useState("");
   const [inviteSuccess, setInviteSuccess] = useState("");
 
   // Delete state
-  const [showDelete, setShowDelete]         = useState(false);
-  const [deleteConfirm, setDeleteConfirm]   = useState("");
-  const [isDeleting, setIsDeleting]         = useState(false);
+  const [showDelete, setShowDelete] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Members state
   const [members, setMembers] = useState(workspace.members);
@@ -90,8 +90,8 @@ export function WorkspaceSettingsClient({
     e.preventDefault();
     setIsSaving(true);
     setSaveMsg("");
-    const res  = await fetch(`/api/workspaces/${workspace.id}`, {
-      method:  "PATCH",
+    const res = await fetch(`/api/workspaces/${workspace.id}`, {
+      method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name, description, color }),
     });
@@ -109,8 +109,8 @@ export function WorkspaceSettingsClient({
     setIsInviting(true);
     setInviteError("");
     setInviteSuccess("");
-    const res  = await fetch(`/api/workspaces/${workspace.id}/members`, {
-      method:  "POST",
+    const res = await fetch(`/api/workspaces/${workspace.id}/members`, {
+      method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email: inviteEmail }),
     });
@@ -127,7 +127,7 @@ export function WorkspaceSettingsClient({
 
   async function handleRemoveMember(userId: string) {
     const res = await fetch(`/api/workspaces/${workspace.id}/members`, {
-      method:  "DELETE",
+      method: "DELETE",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ userId }),
     });
@@ -152,25 +152,25 @@ export function WorkspaceSettingsClient({
 
   const sectionStyle = {
     background: "var(--color-surface)",
-    border:     "1px solid var(--color-border)",
+    border: "1px solid var(--color-border)",
     borderRadius: "12px",
-    padding:    "20px",
+    padding: "20px",
     marginBottom: "16px",
   };
 
   const headingStyle = {
-    fontSize:   "13px",
+    fontSize: "13px",
     fontWeight: "600" as const,
-    color:      "var(--color-text-primary)",
+    color: "var(--color-text-primary)",
     marginBottom: "4px",
-    display:    "flex",
+    display: "flex",
     alignItems: "center",
-    gap:        "8px",
+    gap: "8px",
   };
 
   const subStyle = {
     fontSize: "12px",
-    color:    "var(--color-text-muted)",
+    color: "var(--color-text-muted)",
     marginBottom: "16px",
   };
 
@@ -229,8 +229,8 @@ export function WorkspaceSettingsClient({
                     onClick={() => setColor(c)}
                     className="h-6 w-6 rounded-full transition-transform hover:scale-110"
                     style={{
-                      background:    c,
-                      outline:       color === c ? `2px solid ${c}` : "none",
+                      background: c,
+                      outline: color === c ? `2px solid ${c}` : "none",
                       outlineOffset: "2px",
                     }}
                   />
@@ -266,7 +266,7 @@ export function WorkspaceSettingsClient({
             className="text-xs px-2 py-0.5 rounded-full font-normal"
             style={{
               background: "var(--color-surface-3)",
-              color:      "var(--color-text-muted)",
+              color: "var(--color-text-muted)",
             }}
           >
             {members.length}
@@ -317,8 +317,8 @@ export function WorkspaceSettingsClient({
         {/* Member list */}
         <div className="space-y-2">
           {members.map(({ user, role, joinedAt }) => {
-            const roleStyle   = ROLE_COLORS[role] ?? ROLE_COLORS.MEMBER;
-            const canRemove   = isOwner && user.id !== currentUserId;
+            const roleStyle = ROLE_COLORS[role] ?? ROLE_COLORS.MEMBER;
+            const canRemove = isOwner && user.id !== currentUserId;
             return (
               <div
                 key={user.id}
@@ -388,8 +388,7 @@ export function WorkspaceSettingsClient({
         <div
           style={{
             ...sectionStyle,
-            border: "1px solid var(--color-danger)",
-            borderOpacity: "0.3",
+            border: "1px solid color-mix(in srgb, var(--color-danger) 30%, transparent)",
           }}
         >
           <div style={{ ...headingStyle, color: "var(--color-danger)" }}>
@@ -422,7 +421,7 @@ export function WorkspaceSettingsClient({
                 value={deleteConfirm}
                 onChange={(e) => setDeleteConfirm(e.target.value)}
                 style={{
-                  background:  "var(--color-surface)",
+                  background: "var(--color-surface)",
                   borderColor: "var(--color-danger)",
                 }}
               />
